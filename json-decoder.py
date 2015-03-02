@@ -1,3 +1,8 @@
+# SNPScraper JSON Object Decoding Script
+# Converts JSON objects produced by snpscraper web-crawler into a dictionary of huIDs (keys) download links(values)
+#
+#by Asher Baltzell
+
 import json
 
 data_dict = {}

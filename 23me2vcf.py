@@ -1,11 +1,7 @@
 # 23andMe Tab Separated Data to VCF 4.2 Conversion Script
 # by Asher Baltzell
 #
-#Last Update: 2/15
-
-
-
-# /15
+#Last Update: 2/15/15
 
 from datetime import datetime
 import os
@@ -17,7 +13,7 @@ rundate = datetime.now().strftime("%Y%m%d")
 
 #Pull data from 23andMe TSV, generate dictionary with rsid, chromosome, position, and genotype. Return dictionary as "data"
 def pullData(line):
-    #Remove '\r' newline charactar (was causing bug)
+    #Remove '\r' newline character (was causing bug)
     line = line.strip("\r")
     data = {'rsid': '', 'chrom': '', 'pos': '', 'genotype': '', 'ref': '', 'alt': ''}
     data_list = line.split("\t")
