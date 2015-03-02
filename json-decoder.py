@@ -20,5 +20,5 @@ with open('./snpscraper/snps_3-1-15.json', 'r') as data:
                 data_dict[huid] = link
 
     #ACCESS ALL HUIDS & LINKS
-    for key in data_dict.keys():
-        print key, data_dict[key]
+    #for key in data_dict.keys():
+    #    print key, data_dict[key]
