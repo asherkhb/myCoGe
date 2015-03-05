@@ -4,6 +4,7 @@
 #by Asher Baltzell
 
 import json
+import metagenerator
 
 data_dict = {}
 
@@ -17,8 +18,11 @@ with open('./snpscraper/snps_3-1-15.json', 'r') as data:
         link = "https://my.pgp-hms.org%s" % raw_link
         if huid != '':
             if raw_link != '':
-                data_dict[huid] = link
+                data_dict[huid] = [link, "Health Filler"]
 
     #ACCESS ALL HUIDS & LINKS
     #for key in data_dict.keys():
     #    print key, data_dict[key]
+
+#Use Metagenerator to Generate Metadata File for datapoints in data_dict
+metagenerator.generateMeta(data_dict)
