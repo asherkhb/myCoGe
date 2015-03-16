@@ -1,11 +1,11 @@
 __author__ = 'asherkhb'
 # Script to Obtain Multiple Datasets from PGP
-#Optimized for 23andMe TSV SNP Variant Data
+# Optimized for 23andMe TSV SNP Variant Data
 #
-#by Asher Baltzell
-#Last Update 3/14/15
-#Dependencies: requests, wget
-#version = '1.1.1'
+# by Asher Baltzell
+# Last Update 3/14/15
+# Dependencies: requests, wget
+# version = '1.1.2'
 
 import os
 import datetime
