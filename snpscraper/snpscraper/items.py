@@ -9,7 +9,9 @@ import scrapy
 
 class SnpSet(scrapy.Item):
     huid = scrapy.Field()
-    link = scrapy.Field()
+    download_link = scrapy.Field()
+    profile_link = scrapy.Field()
+    health = scrapy.Field()
 
 class SnpscraperItem(scrapy.Item):
     # define the fields for your item here like:
