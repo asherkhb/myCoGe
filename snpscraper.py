@@ -1,15 +1,26 @@
+__author__ = 'asherkhb'
+
 import scrapy
 
-from snpscraper.items import SnpSet
 
-class SnpSpider(scrapy.Spider):
-    name = 'snp'
+class SnpSet(scrapy.Item):
+    huid = scrapy.Field()
+    download_link = scrapy.Field()
+    profile_link = scrapy.Field()
+    health = scrapy.Field()
+    sequencer = scrapy.Field()
+
+
+class TwentythreeSnpSpider(scrapy.Spider):
+    name = 'twentythree'
     allowed_domains = ['pgp-hms.org']
     start_urls = ['https://my.pgp-hms.org/public_genetic_data?utf8=%E2%9C%93&data_type=23andMe&commit=Search']
 
     def parse(self, response):
         for sel in response.xpath('//div[@class="profile-data"]//tr'):
             item = SnpSet()
+
+            item['sequencer'] = '23andMe'
 
             huid = sel.xpath('td[@data-summarize-as="participant"]/a/text()').extract()
             try:
@@ -41,9 +52,8 @@ class SnpSpider(scrapy.Spider):
                 item['profile_link'] = profile_link
                 item['health'] = ''
 
-            yield item
 
     def parse_health(self, response):
         item = response.meta['health']
         item['health'] = response.xpath('//div[@class="phr"]').extract()
-        return item
+        yield item
