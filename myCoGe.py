@@ -2,10 +2,13 @@ __author__ = 'asherkhb'
 
 import cPickle as pickle
 
-from re import search
 from datetime import datetime
-from subprocess import call
 from json import load
+from os import listdir, mkdir, path, remove, rename
+from re import search
+from shutil import rmtree
+from subprocess import call, check_output, STDOUT
+from zipfile import ZipFile
 
 # Open reference files
 indexfile = '00-All.vcf.p'
@@ -142,9 +145,6 @@ def text_vs_zip(link):
     Returns:
       File Type
     """
-    from re import search
-    from subprocess import check_output, STDOUT
-
     file_type = ''
     #Send request for HTTP head document, then extract content-type into variable "content".
     spider_return = check_output(['wget', '--spider', link], stderr=STDOUT)
@@ -178,9 +178,6 @@ def get_data(experiments, repository):
     Returns:
       obtained: list of huID files actually downloaded
     """
-    from subprocess import call
-    from zipfile import ZipFile
-    from os import listdir, mkdir, rename, remove
 
     #make a folder for the obtained TSVs
     mkdir('./temp/vcfs')
@@ -340,7 +337,6 @@ def pull_data(line):
 
 
 def output_file_name(inputfile):
-    from os import path
 
     filename, _ = path.splitext(inputfile)
     filename = filename.split('/')[-1]
@@ -349,7 +345,6 @@ def output_file_name(inputfile):
 
 
 def tsv_to_vcf(input_file, information_dict):
-    from datetime import datetime
 
     #Get and Format Date
     rundate = datetime.now().strftime("%Y%m%d")
@@ -441,7 +436,6 @@ def irod_import(newly_obtained_data):
 
     :param newly_obtained_data: dictionary of newly obtained data.
     """
-    from subprocess import call
 
     call("iinit", shell=True)
     #Feed Password
@@ -462,17 +456,16 @@ def reset_temp():
 
     removes ./temp folder and all contents, makes a new ./temp folder.
     """
-    from shutil import rmtree
-    from os import mkdir
 
     rmtree('./temp')
     mkdir('./temp')
 
 # Classes
+# Currently Includes...
+#    - SnpExperiment - Class for SNP experiments of all types. Checks file type and converts to VCF.
 
 
 class SnpExperiment(object):
-
     def __init__(self, huid, file_path, vcf_path):
         self.id = huid
         self.file_path = file_path
@@ -637,18 +630,21 @@ class SnpExperiment(object):
                 elif line[0] == '\n':
                     pass
                 else:
-                    datas = self.fourcol_pull_data(line)
-                    chrom = datas['chrom']
-                    pos = datas['pos']
-                    rid = datas['rsid']
-                    ref = datas['ref']
-                    alt = datas['genotype']
-                    qual = '.'
-                    fill = '.'
-                    info = '.\n'
-                    entry = [chrom, pos, rid, ref, alt, qual, fill, info]
-                    new_entry = '\t'.join(entry)
-                    otpt.write(new_entry)
+                    line_thin = line.strip(' ')
+                    line_split = line_thin.split('\t')
+                    if line_split[0] != 'rsid':
+                        datas = self.fourcol_pull_data(line)
+                        chrom = datas['chrom']
+                        pos = datas['pos']
+                        rid = datas['rsid']
+                        ref = datas['ref']
+                        alt = datas['genotype']
+                        qual = '.'
+                        fill = '.'
+                        info = '.\n'
+                        entry = [chrom, pos, rid, ref, alt, qual, fill, info]
+                        new_entry = '\t'.join(entry)
+                        otpt.write(new_entry)
 
     def fivecol_to_vcf(self):
         with open(self.file_path, 'r') as inpt, open(self.vcf_path, 'w') as otpt:

@@ -1,13 +1,11 @@
 __author__ = 'asherkhb'
-#Operation instructions: python initiate.py <run date, format mm-dd-yy>
 
-from sys import argv
-from datetime import datetime
+#Operation instructions: python initiate.py
 
 import myCoGe
 
 
-run_date = datetime.now().strftime("%Y%m%d")
+run_date = myCoGe.datetime.now().strftime("%Y%m%d")
 
 # 1. Execute SNPScraper (Partial)
 #       - Return JSON of huIDs, download links, health info, sequencer
@@ -46,13 +44,16 @@ myCoGe.update_directory(downloads)
 
 ##myCoGe.generate_meta(downloads)
 
-# 8. Convert to VCF (Need to Check) - This should now be check file source, and convert accordingly
+# 8. Convert to VCF
 #
 
 for item in downloads:
+    file_huid = item
     filename = './temp/vcfs/%s.txt' % item
     vcfname = './data/data/vcfs/%s.vcf' % item
-    myCoGe.tsv_to_vcf(filename, downloads)
+
+    experiment = myCoGe.SnpExperiment(file_huid, filename, vcfname)
+    experiment.convert_to_vcf()
 
 # 9. Transfer files to iRODS (Partial)
 #
