@@ -1,5 +1,30 @@
 __author__ = 'asherkhb'
 
+import cPickle as pickle
+
+from re import search
+from datetime import datetime
+from subprocess import call
+from json import load
+
+# Open reference files
+indexfile = '00-All.vcf.p'
+referencefile = '00-All.vcf'
+mergeindexfile = 'RsMergeArch.bcp.p'
+mergefile = 'RsMergeArch.bcp'
+
+snp_index = pickle.load(open(indexfile, 'rb'))
+merge_index = pickle.load(open(mergeindexfile, 'rb'))
+
+reference = open(referencefile, 'r')
+merged = open(mergefile, 'r')
+
+
+def cleanup():
+    reference.close()
+    merged.close()
+
+
 #Functions required for initiation of myCoGe
 
 # 1. Execute SNPScraper
@@ -13,7 +38,6 @@ def scrape_snps(date):
     Dependencies: Python 2.7 w/ Scrapy installed.
     :param date: date of script execution, in format mm-dd-yy
     """
-    from subprocess import call
 
     initiation = "scrapy runspider snpscraper.py -a NAME=twentythree -o ./temp/snps_%s.json" % date
     call(initiation, shell=True)
@@ -37,7 +61,6 @@ def json_decode(snp_json):
       alldata = Dictionary of huIDs, download links, profile links, sequencer, and health info
         Structure: {'huID': {'download_link': link, 'profile_link': link, 'health': health, 'sequencer': sequencer},...}
     """
-    from json import load
 
     #Define empty output dictionaries.
     simpledata = {}
@@ -120,17 +143,19 @@ def text_vs_zip(link):
       File Type
     """
     from re import search
-    from requests import head
+    from subprocess import check_output, STDOUT
 
     file_type = ''
     #Send request for HTTP head document, then extract content-type into variable "content".
-    heading = head(link)
-    content = heading.headers['content-type']
+    spider_return = check_output(['wget', '--spider', link], stderr=STDOUT)
+
     #RE search for file-type, assign file type to variable "file_type".
-    if search('text', content):
-        file_type = "txt"
-    if search('zip', content):
-        file_type = "zip"
+    if search('.txt', spider_return):
+        file_type = 'txt'
+
+    if search('.zip', spider_return):
+        file_type = 'zip'
+
     #Return file type.
     return file_type
 
@@ -157,7 +182,7 @@ def get_data(experiments, repository):
     from zipfile import ZipFile
     from os import listdir, mkdir, rename, remove
 
-    #make a folder for the obtained VCFs
+    #make a folder for the obtained TSVs
     mkdir('./temp/vcfs')
 
     #Iterate through experiment dictionary.
@@ -166,10 +191,12 @@ def get_data(experiments, repository):
         file_link = experiments[key]['download_link']
         file_type = text_vs_zip(file_link)
         file_path = '%s/%s.%s' % (repository, key, file_type)
+
         #WGET File.
         #command: wget -O <output file location and name> <website>
         wget = "wget -O %s %s" % (file_path, file_link)
         call(wget, shell=True)
+
         #Unzip Zipped Files
         if file_type == "zip":
             #Create a ZipFile object.
@@ -186,7 +213,7 @@ def get_data(experiments, repository):
             rename(old_name, new_name)
             remove(file_path)
 
-    #Check what fiels were actually downloaded
+    #Check what files were actually downloaded
     downloaded_files = listdir('./temp/vcfs')
     downloaded = []
     for item in downloaded_files:
@@ -316,6 +343,7 @@ def output_file_name(inputfile):
     from os import path
 
     filename, _ = path.splitext(inputfile)
+    filename = filename.split('/')[-1]
     outputfile = "./data/%s.vcf" % filename
     return outputfile, filename
 
@@ -382,6 +410,24 @@ def tsv_to_vcf(input_file, information_dict):
                     #Write new data string to output file
                     vcf.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (chrom, pos, rsid, ref, alt, qual, snpfilter, info))
 
+                elif line[0] == 'i':
+                    line = line.strip("\n")
+                    #Extract data using pullData function
+                    data = pull_data(line)
+
+                    #Set new data variables
+                    #NOTE: All missing fields delinated with a dot ('.')
+                    chrom = data['chrom']
+                    pos = data['pos']
+                    rsid = data['rsid']
+                    ref = data['ref']
+                    alt = data['alt']
+                    qual = '.'
+                    snpfilter = '.'
+                    info = '.'
+
+                    #Write new data string to output file
+                    vcf.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (chrom, pos, rsid, ref, alt, qual, snpfilter, info))
                 #Skip wierd unpredicted situations
                 else:
                     pass
@@ -390,10 +436,10 @@ def tsv_to_vcf(input_file, information_dict):
 # 9. Transfer files to iRODS
 
 
-def irod_import(dict):
+def irod_import(newly_obtained_data):
     """
 
-    :param dict: dictionary of newly obtained data.
+    :param newly_obtained_data: dictionary of newly obtained data.
     """
     from subprocess import call
 
@@ -402,9 +448,9 @@ def irod_import(dict):
 
     call("icd pgp_variant_data", shell=True)
 
-    for huID in dict:
-        file = "./data/%s.vcf" % huID
-        iput_command = "iput -P %s" % file
+    for huID in newly_obtained_data:
+        file_id = "./data/%s.vcf" % huID
+        iput_command = "iput -P %s" % file_id
         call(iput_command, shell=True)
 
 
@@ -421,3 +467,219 @@ def reset_temp():
 
     rmtree('./temp')
     mkdir('./temp')
+
+# Classes
+
+
+class SnpExperiment(object):
+
+    def __init__(self, huid, file_path, vcf_path):
+        self.id = huid
+        self.file_path = file_path
+        self.file_source = self.get_file_source
+        self.vcf_reference_genome = 'GrCh38 (Annotation Release 106)'
+        self.vcf_path = vcf_path
+
+    @property
+    def get_file_source(self):
+        with open(self.file_path, 'r') as inpt:
+            file_source = 'Unknown'
+            identifyer = inpt.readline()
+            identifyer_compressed = identifyer.strip('\n').strip('\r').strip(' ')
+            identifyer_contents = identifyer_compressed.split('\t')
+
+            if search('23andMe', identifyer):
+                file_source = '23andMe'
+
+            elif search('AncestryDNA', identifyer):
+                file_source = 'AncestryDNA'
+
+            elif identifyer_contents[0] == 'rsid':
+                if len(identifyer_contents) == 4:
+                    file_source = 'Genetic_4col'
+                elif len(identifyer_contents) == 5:
+                    file_source = 'Generic_5col'
+
+            else:
+                file_source = 'Unknown'
+
+        return file_source
+
+    def convert_to_vcf(self):
+        filetype = self.file_source
+
+        if filetype == '23andMe':
+            self.fourcol_to_vcf()
+
+        elif filetype == 'AncestryDNA':
+            self.fivecol_to_vcf()
+
+        elif filetype == 'Generic_4col':
+            self.fourcol_to_vcf()
+
+        elif filetype == 'Generic_5col':
+            self.fivecol_to_vcf()
+
+        else:
+            pass
+
+    @staticmethod
+    def fourcol_pull_data(line_to_pull):
+        data = {'rsid': '', 'chrom': '', 'pos': '', 'genotype': '', 'ref': ''}
+
+        pulling_line = line_to_pull.strip('\n').strip('\r')
+        data_list = pulling_line.split('\t')
+        rsid = data_list[0]
+        legacy_id = rsid
+
+        #Redo id's that don't start with rs
+        if rsid[0] == 'i':
+            rsid = rsid.replace('i', 'rs')
+
+        data['rsid'] = rsid
+        data['chrom'] = data_list[1]
+        data['genotype'] = data_list[3]
+
+        try:
+            ref_loc = snp_index[rsid]
+            reference.seek(ref_loc)
+            referenceline = reference.readline()
+            referenceline_split = referenceline.split('\t')
+            data['pos'] = referenceline_split[1]    # This position updates to the new ref., GrCh38 (An. Release 106)
+            data['ref'] = referenceline_split[3]
+        except KeyError:
+            #If key isn't found, search RsMerge table for new rsID, update rsID to account for this
+            try:
+                rsid_base = rsid.replace('rs', '')
+                merge_loc = merge_index[rsid_base]
+                merged.seek(merge_loc)
+                mergeline = merged.readline()
+                mergeline_split = mergeline.split('\t')
+                new_id_base = str(mergeline_split[1])
+                new_id = 'rs' + new_id_base
+                data['rsid'] = new_id
+                ref_loc = snp_index[new_id]
+                reference.seek(ref_loc)
+                referenceline = reference.readline()
+                referenceline_split = referenceline.split('\t')
+                data['pos'] = referenceline_split[1]    # Position updates to GrCh38 (An. Release 106)
+                data['ref'] = referenceline_split[3]
+            except KeyError:
+                data['rsid'] = legacy_id
+                data['pos'] = '0'
+                data['ref'] = '?'
+
+        return data
+
+    @staticmethod
+    def fivecol_pull_data(line_to_pull):
+        data = {'rsid': '', 'chrom': '', 'pos': '', 'genotype': '', 'ref': ''}
+
+        pulling_line = line_to_pull.strip('\n').strip('\r')
+        data_list = pulling_line.split('\t')
+        rsid = data_list[0]
+        legacy_id = rsid
+
+        #Redo id's that don't start with rs
+        if rsid[0] == 'i':
+            rsid = rsid.replace('i', 'rs')
+
+        data['rsid'] = rsid
+        data['chrom'] = data_list[1]
+        data['genotype'] = data_list[3] + data_list[4]
+
+        try:
+            ref_loc = snp_index[rsid]
+            reference.seek(ref_loc)
+            referenceline = reference.readline()
+            referenceline_split = referenceline.split('\t')
+            data['pos'] = referenceline_split[1]    # This position updates to the new ref., GrCh38 (An. Release 106)
+            data['ref'] = referenceline_split[3]
+        except KeyError:
+            #If key isn't found, search RsMerge table for new rsID, update rsID to account for this
+            try:
+                rsid_base = rsid.replace('rs', '')
+                merge_loc = merge_index[rsid_base]
+                merged.seek(merge_loc)
+                mergeline = merged.readline()
+                mergeline_split = mergeline.split('\t')
+                new_id_base = str(mergeline_split[1])
+                new_id = 'rs' + new_id_base
+                data['rsid'] = new_id
+                ref_loc = snp_index[new_id]
+                reference.seek(ref_loc)
+                referenceline = reference.readline()
+                referenceline_split = referenceline.split('\t')
+                data['pos'] = referenceline_split[1]    # Position updates to GrCh38 (An. Release 106)
+                data['ref'] = referenceline_split[3]
+            except KeyError:
+                data['rsid'] = legacy_id
+                data['pos'] = '0'
+                data['ref'] = '?'
+
+        return data
+
+    def fourcol_to_vcf(self):
+        with open(self.file_path, 'r') as inpt, open(self.vcf_path, 'w') as otpt:
+            #Get and Format Date
+            rundate = datetime.now().strftime("%Y%m%d")
+
+            otpt.write('##fileformat=VCFv4.2\n')
+            otpt.write('##fileDate=%s\n' % rundate)
+            otpt.write('##source=myCoGe-twentythree_to_vcf.py\n')
+            otpt.write('##reference = \n')
+
+            otpt.write('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n')
+
+            for line in inpt:
+                if line[0] == '#':
+                    pass
+                elif line[0] == '\n':
+                    pass
+                else:
+                    datas = self.fourcol_pull_data(line)
+                    chrom = datas['chrom']
+                    pos = datas['pos']
+                    rid = datas['rsid']
+                    ref = datas['ref']
+                    alt = datas['genotype']
+                    qual = '.'
+                    fill = '.'
+                    info = '.\n'
+                    entry = [chrom, pos, rid, ref, alt, qual, fill, info]
+                    new_entry = '\t'.join(entry)
+                    otpt.write(new_entry)
+
+    def fivecol_to_vcf(self):
+        with open(self.file_path, 'r') as inpt, open(self.vcf_path, 'w') as otpt:
+            #Get and Format Date
+            rundate = datetime.now().strftime("%Y%m%d")
+
+            otpt.write('##fileformat=VCFv4.2\n')
+            otpt.write('##fileDate=%s\n' % rundate)
+            otpt.write('##source=myCoGe.py\n')
+            otpt.write('##reference=\n')
+
+            otpt.write('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n')
+
+            for line in inpt:
+                if line[0] == '#':
+                    pass
+                elif line[0] == '\n':
+                    pass
+                else:
+                    line_thin = line.strip(' ')
+                    line_split = line_thin.split('\t')
+                    if line_split[0] != 'rsid':
+                        datas = self.fivecol_pull_data(line)
+                        chrom = datas['chrom']
+                        pos = datas['pos']
+                        rid = datas['rsid']
+                        ref = datas['ref']
+                        alt = datas['genotype']
+                        qual = '.'
+                        fill = '.'
+                        info = '.\n'
+                        entry = [chrom, pos, rid, ref, alt, qual, fill, info]
+                        new_entry = '\t'.join(entry)
+                        otpt.write(new_entry)
