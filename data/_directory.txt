@@ -1,13 +1,3 @@
 #myCoGe SNP Variant Data Log File
 #huID   profile_link    download_link
 
-hu52F1E0	https://my.pgp-hms.org/profile/hu52F1E0	https://my.pgp-hms.org/user_file/download/1410
-hu4D906B	https://my.pgp-hms.org/profile/hu4D906B	https://my.pgp-hms.org/user_file/download/1419
-hu5DD02A	https://my.pgp-hms.org/profile/hu5DD02A	https://my.pgp-hms.org/user_file/download/1414
-huC48342	https://my.pgp-hms.org/profile/huC48342	https://my.pgp-hms.org/user_file/download/1406
-hu1287DA	https://my.pgp-hms.org/profile/hu1287DA	https://my.pgp-hms.org/user_file/download/1408
-hu88998A	https://my.pgp-hms.org/profile/hu88998A	https://my.pgp-hms.org/user_file/download/1420
-huBB3ECE	https://my.pgp-hms.org/profile/huBB3ECE	https://my.pgp-hms.org/user_file/download/1413
-huB508F1	https://my.pgp-hms.org/profile/huB508F1	https://my.pgp-hms.org/user_file/download/1422
-huAC8440	https://my.pgp-hms.org/profile/huAC8440	https://my.pgp-hms.org/user_file/download/1415
-hu72E8CF	https://my.pgp-hms.org/profile/hu72E8CF	https://my.pgp-hms.org/user_file/download/1412
