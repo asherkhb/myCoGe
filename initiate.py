@@ -23,17 +23,21 @@ simple_data, all_data = myCoGe.json_decode(json_file)
 #       - Return modified dictionary
 
 missing_data = myCoGe.compare_to_directory(all_data)
-
+print missing_data
 
 # 4. Download Data
 #       - Download missing data fileset.
 
-repo = './temp/tsvs'
+repo = './data/tsvs'
 downloaded = myCoGe.get_data(missing_data, repo)
+
+print downloaded
 
 # 5. RESOLVE DOWNLOADED/MISSING, GENERATE NEW DICT UPDATE DICT, and PRINT ERROR REPORTS
 
 downloads, absent = myCoGe.list_dict_resolve(downloaded, missing_data)
+
+print downloads
 
 # 6. Update File Directory
 
@@ -49,7 +53,7 @@ myCoGe.update_directory(downloads)
 
 for item in downloads:
     file_huid = item
-    filename = './temp/tsvs/%s.txt' % item
+    filename = './data/tsvs/%s.txt' % item
     vcfname = './data/vcfs/%s.vcf' % item
 
     experiment = myCoGe.SnpExperiment(file_huid, filename, vcfname)
@@ -63,10 +67,7 @@ for item in downloads:
 # 10. Batch load into CoGe (Incomplete)
 #
 
-# 11. Delete temp folder, make new temp folder
 
-##myCoGe.reset_temp()
-
-# 12. Cleanup - Close files and delete any temps.
+# 11. Cleanup - Close files and delete any temps, remake necessary temps
 
 myCoGe.cleanup()

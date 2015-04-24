@@ -10,6 +10,7 @@ from shutil import rmtree
 from subprocess import call, check_output, STDOUT
 from zipfile import ZipFile
 
+
 # Open reference files
 indexfile = '00-All.vcf.p'
 referencefile = '00-All.vcf'
@@ -26,7 +27,8 @@ merged = open(mergefile, 'r')
 def cleanup():
     reference.close()
     merged.close()
-
+    #rmtree('./temp')
+    #mkdir('./temp')
 
 #Functions required for initiation of myCoGe
 
@@ -180,7 +182,6 @@ def get_data(experiments, repository):
     """
 
     #make a folder for the obtained TSVs
-    mkdir('./temp/vcfs')
 
     #Iterate through experiment dictionary.
     for key in experiments:
@@ -211,7 +212,7 @@ def get_data(experiments, repository):
             remove(file_path)
 
     #Check what files were actually downloaded
-    downloaded_files = listdir('./temp/vcfs')
+    downloaded_files = listdir(repository)
     downloaded = []
     for item in downloaded_files:
         downloaded.append(item.strip('.txt'))
@@ -447,18 +448,6 @@ def irod_import(newly_obtained_data):
         iput_command = "iput -P %s" % file_id
         call(iput_command, shell=True)
 
-
-# 11. Reset temp folder
-
-
-def reset_temp():
-    """Reset temp Folder
-
-    removes ./temp folder and all contents, makes a new ./temp folder.
-    """
-
-    rmtree('./temp')
-    mkdir('./temp')
 
 # Classes
 # Currently Includes...
