@@ -56,6 +56,8 @@ for item in downloads:
     experiment = myCoGe.SnpExperiment(file_huid, filename, vcfname)
     experiment.convert_to_vcf()
 
+print "File Conversions Complete"
+
 # 9. Transfer files to iRODS (Partial)
 #
 

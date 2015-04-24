@@ -6,7 +6,7 @@ from datetime import datetime
 from json import load
 from os import listdir, mkdir, path, remove, rename
 from re import search
-from shutil import rmtree
+from shutil import rmtree, move
 from subprocess import call, check_output, STDOUT
 from zipfile import ZipFile
 
@@ -25,11 +25,13 @@ merged = open(mergefile, 'r')
 
 print "Reference Documents Successfully Imported"
 
+
 def cleanup():
     reference.close()
     merged.close()
     #rmtree('./temp')
     #mkdir('./temp')
+    print "Cleanup Operations Complete"
 
 #Functions required for initiation of myCoGe
 
@@ -220,7 +222,7 @@ def get_data(experiments, repository):
     for item in downloaded_files:
         downloaded.append(item.strip('.txt'))
 
-    print "Missing data downloaded."
+    print "Missing Data Downloaded"
     return downloaded
 
 
@@ -507,7 +509,8 @@ class SnpExperiment(object):
             self.fivecol_to_vcf()
 
         else:
-            pass
+            move(self.file_path, './unknown_fileformats/%s' % path.basename(self.file_path))
+            print "%s Filetype Unknown.\n -->TSV moved to ./unknown_fileformats/ for review" % self.file_path
 
     @staticmethod
     def fourcol_pull_data(line_to_pull):
