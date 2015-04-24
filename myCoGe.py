@@ -23,6 +23,7 @@ merge_index = pickle.load(open(mergeindexfile, 'rb'))
 reference = open(referencefile, 'r')
 merged = open(mergefile, 'r')
 
+print "Reference Documents Successfully Imported"
 
 def cleanup():
     reference.close()
@@ -46,7 +47,7 @@ def scrape_snps(date):
 
     initiation = "scrapy runspider snpscraper.py -a NAME=twentythree -o ./temp/snps_%s.json" % date
     call(initiation, shell=True)
-
+    print "SNPScraper Complete"
 
 # 2. Decode JSON into dictionary
 
@@ -92,6 +93,7 @@ def json_decode(snp_json):
                              'health': health,
                              'sequencer': sequencer}
 
+    print "JSON Decoded"
     #Return dictionaries.
     return simpledata, alldata
 
@@ -127,6 +129,7 @@ def compare_to_directory(simple_data_dict):
         else:
             missingdata[huid] = alldata[huid]
 
+    print "Missing Data Identified"
     return missingdata
 
 
@@ -217,6 +220,7 @@ def get_data(experiments, repository):
     for item in downloaded_files:
         downloaded.append(item.strip('.txt'))
 
+    print "Missing data downloaded."
     return downloaded
 
 
@@ -259,7 +263,7 @@ def update_directory(missing_data):
             download_link = missing_data[entry]['download_link']
             entry = '%s\t%s\t%s\n' % (huid, profile_link, download_link)
             directory.write(entry)
-
+    print "Directory Updated"
 
 # 7. Generate Metadata
 
@@ -319,7 +323,7 @@ def generate_item_meta(huid, link, health):
 
 # 8. Convert files to VCF
 
-
+"""
 def pull_data(line):
     #Remove '\r' newline character (was causing bug)
     line = line.strip("\r")
@@ -427,7 +431,7 @@ def tsv_to_vcf(input_file, information_dict):
                 #Skip wierd unpredicted situations
                 else:
                     pass
-
+"""
 
 # 9. Transfer files to iRODS
 
@@ -635,6 +639,8 @@ class SnpExperiment(object):
                         new_entry = '\t'.join(entry)
                         otpt.write(new_entry)
 
+        print "%s Converted to VCF" % self.file_path
+
     def fivecol_to_vcf(self):
         with open(self.file_path, 'r') as inpt, open(self.vcf_path, 'w') as otpt:
             #Get and Format Date
@@ -668,3 +674,5 @@ class SnpExperiment(object):
                         entry = [chrom, pos, rid, ref, alt, qual, fill, info]
                         new_entry = '\t'.join(entry)
                         otpt.write(new_entry)
+
+        print "%s Converted to VCF" % self.file_path

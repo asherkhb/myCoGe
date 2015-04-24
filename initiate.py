@@ -23,7 +23,6 @@ simple_data, all_data = myCoGe.json_decode(json_file)
 #       - Return modified dictionary
 
 missing_data = myCoGe.compare_to_directory(all_data)
-print missing_data
 
 # 4. Download Data
 #       - Download missing data fileset.
@@ -31,13 +30,11 @@ print missing_data
 repo = './data/tsvs'
 downloaded = myCoGe.get_data(missing_data, repo)
 
-print downloaded
 
 # 5. RESOLVE DOWNLOADED/MISSING, GENERATE NEW DICT UPDATE DICT, and PRINT ERROR REPORTS
 
 downloads, absent = myCoGe.list_dict_resolve(downloaded, missing_data)
 
-print downloads
 
 # 6. Update File Directory
 
