@@ -1,8 +1,13 @@
 __author__ = 'asherkhb'
 
 import cPickle as pickle
+import smtplib
 
 from datetime import datetime
+from email import Encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from json import load
 from os import listdir, mkdir, path, remove, rename
 from re import search
@@ -31,6 +36,8 @@ def cleanup():
     merged.close()
     #rmtree('./temp')
     #mkdir('./temp')
+    #mkdir('./temp/pickles')
+
     print "Cleanup Operations Complete"
 
 #Functions required for initiation of myCoGe
@@ -324,116 +331,7 @@ def generate_item_meta(huid, link, health):
 
 
 # 8. Convert files to VCF
-
-"""
-def pull_data(line):
-    #Remove '\r' newline character (was causing bug)
-    line = line.strip("\r")
-    data = {'rsid': '', 'chrom': '', 'pos': '', 'genotype': '', 'ref': '', 'alt': ''}
-    data_list = line.split("\t")
-    data['rsid'] = data_list[0]
-    data['chrom'] = data_list[1]
-    data['pos'] = data_list[2]
-    data['genotype'] = data_list[3]
-    data['ref'] = data_list[3][0]
-    if len(data['genotype']) == 2:
-        data['alt'] = data_list[3][1]
-    elif len(data['genotype']) != 2:
-        data['alt'] = '-'
-    return data
-
-
-def output_file_name(inputfile):
-
-    filename, _ = path.splitext(inputfile)
-    filename = filename.split('/')[-1]
-    outputfile = "./data/%s.vcf" % filename
-    return outputfile, filename
-
-
-def tsv_to_vcf(input_file, information_dict):
-
-    #Get and Format Date
-    rundate = datetime.now().strftime("%Y%m%d")
-
-    #Specify input file
-    inputfile = input_file
-
-    #Generate output file name
-    outputfile, filename = output_file_name(inputfile)
-
-    #Open input file
-    with open(inputfile, 'r') as inpt:
-        #Open Output File
-        with open(outputfile, 'w') as vcf:
-            #Print Meta-Information
-            vcf.write("##fileformat=VCFv4.2\n")
-            vcf.write("##fileDate=%s\n" % rundate)
-            vcf.write("##source=23me2VCF.pyV%s\n")
-            vcf.write("##reference=%s\n" % information_dict[filename]['download_link'])
-            #***ADDITIONAL META-INFO HERE***
-            vcf.write("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n")
-
-            #Process Data, Line by Line, until end of document
-            reading = True
-            while reading:
-                #Set line variable to current line
-                line = inpt.readline()
-
-                #End Data Processing at End of File
-                if line == '':
-                    reading = False
-
-                #Skip Blank Lines
-                elif line == '\n':
-                    pass
-
-                #Skip Comment Lines
-                elif line[0] == '#':
-                    pass
-
-                #Process Data Lines
-                elif line[0] == 'r':
-                    line = line.strip("\n")
-                    #Extract data using pullData function
-                    data = pull_data(line)
-
-                    #Set new data variables
-                    #NOTE: All missing fields delinated with a dot ('.')
-                    chrom = data['chrom']
-                    pos = data['pos']
-                    rsid = data['rsid']
-                    ref = data['ref']
-                    alt = data['alt']
-                    qual = '.'
-                    snpfilter = '.'
-                    info = '.'
-
-                    #Write new data string to output file
-                    vcf.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (chrom, pos, rsid, ref, alt, qual, snpfilter, info))
-
-                elif line[0] == 'i':
-                    line = line.strip("\n")
-                    #Extract data using pullData function
-                    data = pull_data(line)
-
-                    #Set new data variables
-                    #NOTE: All missing fields delinated with a dot ('.')
-                    chrom = data['chrom']
-                    pos = data['pos']
-                    rsid = data['rsid']
-                    ref = data['ref']
-                    alt = data['alt']
-                    qual = '.'
-                    snpfilter = '.'
-                    info = '.'
-
-                    #Write new data string to output file
-                    vcf.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (chrom, pos, rsid, ref, alt, qual, snpfilter, info))
-                #Skip wierd unpredicted situations
-                else:
-                    pass
-"""
+# Uses SnpExperiment Class
 
 # 9. Transfer files to iRODS
 
@@ -453,6 +351,69 @@ def irod_import(newly_obtained_data):
         file_id = "./data/%s.vcf" % huID
         iput_command = "iput -P %s" % file_id
         call(iput_command, shell=True)
+
+
+# 11. Generate Logs, Email Log File
+
+
+def generate_log_pickles(dictionary_of_datasets):
+    #Dataset dictionaries should be dataset_name:dataset key:values
+    pickles = []
+    for key in dictionary_of_datasets:
+        dataset_pickle_name = './temp/pickles' + key + '.p'
+        dataset_contents = dictionary_of_datasets[key]
+        pickle.dump(dataset_contents, open(dataset_pickle_name, "wb"))
+        pickles.append(dataset_pickle_name)
+
+    call('tar -zcf ./temp/pickles.tar.gz ./temp/pickles', shell=True)
+    return pickles
+
+
+def send_email_log(new_files_added_list, attachments):
+    account = "mycoge@gmail.com"
+    password = "9P4cx3OoW3"
+
+    date = '4-24-15'
+    number = str(len(new_files_added_list))
+
+    FROM = account
+    TO = ['ahaug@email.arizona.edu']
+    SUBJECT = "myCoGe Log - %s" % date
+    TEXT = "myCoGe was successfully executed, with %s new experiments added today.\n" \
+           "The following files were added:\n%s" \
+           "\n\n The following log files are attached:\n" \
+           " - snps_DATE.json : JSON object generated by webscraping PGP for SNP datasets.\n" \
+           " - _directory.txt : Current directory of all added experiments.\n" \
+           " - pickles.tar.gz : Binary representations of critical script datasets. \n" \
+           " - terminal_output.txt : Text file of all terminal output from script. \n" \
+           % (number, '\n'.join(new_files_added_list))
+
+
+
+    msg = MIMEMultipart()
+    msg['Subject'] = SUBJECT
+    msg['From'] = FROM
+    msg['To'] = ', '.join(TO)
+
+    msg.attach(MIMEText(TEXT))
+
+    for item in attachments:
+        part = MIMEBase('application', "octet-stream")
+        part.set_payload(open(item, 'rb').read())
+        Encoders.encode_base64(part)
+        part.add_header('Content-Disposition', 'attachment; filename="%s"' % basename(item))
+        msg.attach(part)
+
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.ehlo()
+        server.starttls()
+        server.login(account, password)
+        server.sendmail(FROM, TO, msg.as_string())
+        server.close()
+        print "Message Sent"
+    except:
+        print "Email Failure - Log written to file"
 
 
 # Classes
