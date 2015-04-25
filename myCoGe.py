@@ -373,7 +373,7 @@ def send_email_log(new_files_added_list, attachments):
     account = "mycoge@gmail.com"
     password = "9P4cx3OoW3"
 
-    date = datetime.now().strftime("%Y-%m-%d")
+    date = datetime.now().strftime("%m-%d-%Y")
     number = str(len(new_files_added_list))
 
     FROM = account
