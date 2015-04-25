@@ -373,7 +373,7 @@ def send_email_log(new_files_added_list, attachments):
     account = "mycoge@gmail.com"
     password = "9P4cx3OoW3"
 
-    date = '4-24-15'
+    date = datetime.now().strftime("%Y-%m-%d")
     number = str(len(new_files_added_list))
 
     FROM = account
@@ -387,8 +387,6 @@ def send_email_log(new_files_added_list, attachments):
            " - pickles.tar.gz : Binary representations of critical script datasets. \n" \
            " - terminal_output.txt : Text file of all terminal output from script. \n" \
            % (number, '\n'.join(new_files_added_list))
-
-
 
     msg = MIMEMultipart()
     msg['Subject'] = SUBJECT
