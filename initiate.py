@@ -1,6 +1,6 @@
 __author__ = 'asherkhb'
 
-#Operation instructions: "python initiate.py 2>&1 | ./temp/terminal_log.txt"
+#Operation instructions: "python initiate.py 2>&1 | tee ./temp/terminal_log.txt"
 
 import myCoGe
 

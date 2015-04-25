@@ -399,7 +399,7 @@ def send_email_log(new_files_added_list, attachments):
         part = MIMEBase('application', "octet-stream")
         part.set_payload(open(item, 'rb').read())
         Encoders.encode_base64(part)
-        part.add_header('Content-Disposition', 'attachment; filename="%s"' % basename(item))
+        part.add_header('Content-Disposition', 'attachment; filename="%s"' % path.basename(item))
         msg.attach(part)
 
     try:
