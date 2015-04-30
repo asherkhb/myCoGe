@@ -360,7 +360,7 @@ def generate_log_pickles(dictionary_of_datasets):
     #Dataset dictionaries should be dataset_name:dataset key:values
     pickles = []
     for key in dictionary_of_datasets:
-        dataset_pickle_name = './temp/pickles' + key + '.p'
+        dataset_pickle_name = './temp/pickles/' + key + '.p'
         dataset_contents = dictionary_of_datasets[key]
         pickle.dump(dataset_contents, open(dataset_pickle_name, "wb"))
         pickles.append(dataset_pickle_name)
