@@ -10,13 +10,13 @@ run_date = myCoGe.datetime.now().strftime("%Y%m%d")
 # 1. Execute SNPScraper (Partial)
 #       - Return JSON of huIDs, download links, health info, sequencer
 
-##myCoGe.scrape_snps(run_date)
+myCoGe.scrape_snps(run_date)
 
 # 2. Decode JSON into dictionary (Partial)
 #       - Return Dictionary of huIDs, download links, health info
 
-##json_file = './temp/snps_%s.json' % run_date
-json_file = './temp/practice_1.json'  # For Practice
+json_file = './temp/snps_%s.json' % run_date
+##json_file = './temp/practice_1.json'  # For Practice
 simple_data, all_data = myCoGe.json_decode(json_file)
 
 # 3. Compare dictionary with File Directory (_directory.txt)
