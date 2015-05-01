@@ -4,8 +4,16 @@ __author__ = 'asherkhb'
 
 import myCoGe
 
+# 0. Book keeping
+
+myCoGe.initialize()
 
 run_date = myCoGe.datetime.now().strftime("%Y%m%d")
+configs = myCoGe.pickle.load(open('config.p', 'rb'))
+auth_k = configs['key']
+auth_s = configs['secret']
+irods_pass = configs['pass']
+
 
 # 1. Execute SNPScraper (Partial)
 #       - Return JSON of huIDs, download links, health info, sequencer
@@ -58,14 +66,15 @@ for item in downloads:
 
 print "File Conversions Complete"
 
-# 9. Transfer files to iRODS (Partial)
+# 9. Transfer files to iRODS
 #
 
+myCoGe.isync(irods_pass)
 
 # 10. Batch load into CoGe (Incomplete)
 #
 
-# 11. Generate Logs & Email Logfile
+# 11. Generate Logs, Dump for finalize.py.
 
 preserved_datastructures = {'all_data': all_data,
                             'missing_data': missing_data,
@@ -80,8 +89,11 @@ email_log_attachments = [json_file,
                          './temp/pickles.tar.gz',
                          './temp/terminal_log.txt']
 
-myCoGe.send_email_log(downloads, email_log_attachments)
+myCoGe.pickle.dump(downloads, open('./temp/finalize_downloads.p', 'wb'))
+myCoGe.pickle.dump(email_log_attachments, open('./temp/finalize_email_log_attachments.p', 'wb'))
 
-# 12. Cleanup - Close files and delete any temps, remake necessary temps
+##myCoGe.send_email_log(downloads, email_log_attachments)
+
+# 12. Cleanup - Close files.
 
 myCoGe.cleanup()
