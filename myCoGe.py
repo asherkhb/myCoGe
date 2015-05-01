@@ -240,20 +240,23 @@ def get_data(experiments, repository):
 
         #Unzip Zipped Files
         if file_type == "zip":
-            #Create a ZipFile object.
-            zip_file = ZipFile(file_path)
-            #Create a list of ZipFile contents.
-            zip_list = ZipFile.namelist(zip_file)
-            #Create variables with old content name and new (huID) content name.
-            old_name = "%s/%s" % (repository, zip_list[0])
-            new_name = file_path.replace('.zip', '.txt')
-            #Unzip ZipFile.
-            unzip = "unzip %s -d %s " % (file_path, repository)
-            call(unzip, shell=True)
-            #Rename file contents with huID and then remove zip file.
-            rename(old_name, new_name)
-            remove(file_path)
-            pass
+            if file_path == "./data/tsvs/huD85057.zip":
+                pass
+            else:
+                #Create a ZipFile object.
+                zip_file = ZipFile(file_path)
+                #Create a list of ZipFile contents.
+                zip_list = ZipFile.namelist(zip_file)
+                #Create variables with old content name and new (huID) content name.
+                old_name = "%s/%s" % (repository, zip_list[0])
+                new_name = file_path.replace('.zip', '.txt')
+                #Unzip ZipFile.
+                unzip = "unzip %s -d %s " % (file_path, repository)
+                call(unzip, shell=True)
+                #Rename file contents with huID and then remove zip file.
+                rename(old_name, new_name)
+                remove(file_path)
+                pass
 
     #Check what files were actually downloaded
     downloaded_files = listdir(repository)
