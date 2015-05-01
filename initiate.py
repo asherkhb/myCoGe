@@ -18,7 +18,7 @@ irods_pass = configs['pass']
 # 1. Execute SNPScraper (Partial)
 #       - Return JSON of huIDs, download links, health info, sequencer
 
-myCoGe.scrape_snps(run_date)
+##myCoGe.scrape_snps(run_date)
 
 # 2. Decode JSON into dictionary (Partial)
 #       - Return Dictionary of huIDs, download links, health info

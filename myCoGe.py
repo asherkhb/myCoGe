@@ -253,6 +253,7 @@ def get_data(experiments, repository):
             #Rename file contents with huID and then remove zip file.
             rename(old_name, new_name)
             remove(file_path)
+            pass
 
     #Check what files were actually downloaded
     downloaded_files = listdir(repository)
