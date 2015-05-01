@@ -248,7 +248,7 @@ def get_data(experiments, repository):
             old_name = "%s/%s" % (repository, zip_list[0])
             new_name = file_path.replace('.zip', '.txt')
             #Unzip ZipFile.
-            unzip = "unzip %s -d ./%s " % (file_path, repository)
+            unzip = "unzip %s -d %s " % (file_path, repository)
             call(unzip, shell=True)
             #Rename file contents with huID and then remove zip file.
             rename(old_name, new_name)
