@@ -235,7 +235,7 @@ def get_data(experiments, repository):
 
         #WGET File.
         #command: wget -O <output file location and name> <website>
-        wget = "wget -O %s %s" % (file_path, file_link)
+        wget = "wget --tries=4 --timeout=30 -O %s %s" % (file_path, file_link)
         call(wget, shell=True)
 
         #Unzip Zipped Files
