@@ -229,56 +229,57 @@ def get_data(experiments, repository):
     """
 
     #make a folder for the obtained TSVs
-
+    failures = ['huB066C2']
     #Iterate through experiment dictionary.
     for key in experiments:
-        #Define download link from dictionary, use textVsZip for file type, then define file path.
-        file_link = experiments[key]['download_link']
-        try:
-            file_type = text_vs_zip(file_link)
-        except:
-            file_type = 'NA'
+        if key not in failures:
+            #Define download link from dictionary, use textVsZip for file type, then define file path.
+            file_link = experiments[key]['download_link']
+            try:
+                file_type = text_vs_zip(file_link)
+            except:
+                file_type = 'NA'
 
-        file_path = '%s/%s.%s' % (repository, key, file_type)
+            file_path = '%s/%s.%s' % (repository, key, file_type)
 
-        #WGET File.
-        #command: wget -O <output file location and name> <website>
-        if file_type != 'NA':
-            if file_type == 'txt':
-                wget = "wget --tries=4 --timeout=30 -O %s %s" % (file_path, file_link)
-                call(wget, shell=True)
-            elif file_type == 'zip':
-                new_path = './data/zips/%s.%s' % (key, file_type)
-                wget = "wget --tries=4 --timeout=30 -O %s %s" % (new_path, file_link)
-                call(wget, shell=True)
-            else:
-                pass
+            #WGET File.
+            #command: wget -O <output file location and name> <website>
+            if file_type != 'NA':
+                if file_type == 'txt':
+                    wget = "wget --tries=4 --timeout=30 -O %s %s" % (file_path, file_link)
+                    call(wget, shell=True)
+                elif file_type == 'zip':
+                    new_path = './data/zips/%s.%s' % (key, file_type)
+                    wget = "wget --tries=4 --timeout=30 -O %s %s" % (new_path, file_link)
+                    call(wget, shell=True)
+                else:
+                    pass
 
-        #Unzip Zipped Files
-        #if file_type == "zip":
-            #try:
-                #new_path = './data/zips/%s.%s' % (key, file_type)
-                #move(file_path, new_path)
-            #except:
-                #pass
-            #Create a ZipFile object.
-            #try:
-            #    zip_file = ZipFile(file_path)
-            #    #Create a list of ZipFile contents.
-            #    zip_list = ZipFile.namelist(zip_file)
-            #    #Create variables with old content name and new (huID) content name.
-            #    old_name = "%s/%s" % (repository, zip_list[0])
-            #    new_name = file_path.replace('.zip', '.txt')
-            #    #Unzip ZipFile.
-            #    unzip = "unzip %s -d %s " % (file_path, repository)
-            #    call(unzip, shell=True)
-            #    #Rename file contents with huID and then remove zip file.
-            #    rename(old_name, new_name)
-            #    remove(file_path)
-            #except:
-            #    print "ERROR UNZIPPING %s" % key
-        #else:
-        #    pass
+            #Unzip Zipped Files
+            #if file_type == "zip":
+                #try:
+                    #new_path = './data/zips/%s.%s' % (key, file_type)
+                    #move(file_path, new_path)
+                #except:
+                    #pass
+                #Create a ZipFile object.
+                #try:
+                #    zip_file = ZipFile(file_path)
+                #    #Create a list of ZipFile contents.
+                #    zip_list = ZipFile.namelist(zip_file)
+                #    #Create variables with old content name and new (huID) content name.
+                #    old_name = "%s/%s" % (repository, zip_list[0])
+                #    new_name = file_path.replace('.zip', '.txt')
+                #    #Unzip ZipFile.
+                #    unzip = "unzip %s -d %s " % (file_path, repository)
+                #    call(unzip, shell=True)
+                #    #Rename file contents with huID and then remove zip file.
+                #    rename(old_name, new_name)
+                #    remove(file_path)
+                #except:
+                #    print "ERROR UNZIPPING %s" % key
+            #else:
+            #    pass
 
     #Check what files were actually downloaded
     downloaded_files = listdir(repository)
