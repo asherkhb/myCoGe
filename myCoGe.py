@@ -238,22 +238,29 @@ def get_data(experiments, repository):
             file_type = text_vs_zip(file_link)
         except:
             file_type = 'NA'
+
         file_path = '%s/%s.%s' % (repository, key, file_type)
 
         #WGET File.
         #command: wget -O <output file location and name> <website>
         if file_type != 'NA':
-            wget = "wget --tries=4 --timeout=30 -O %s %s" % (file_path, file_link)
-            call(wget, shell=True)
-
+            if file_type == 'txt':
+                wget = "wget --tries=4 --timeout=30 -O %s %s" % (file_path, file_link)
+                call(wget, shell=True)
+            elif file_type == 'zip':
+                new_path = './data/zips/%s.%s' % (key, file_type)
+                wget = "wget --tries=4 --timeout=30 -O %s %s" % (new_path, file_link)
+                call(wget, shell=True)
+            else:
+                pass
 
         #Unzip Zipped Files
-        if file_type == "zip":
-            try:
-                new_path = './data/zips/%s.%s' % (key, file_type)
-                move(file_path, new_path)
-            except:
-                pass
+        #if file_type == "zip":
+            #try:
+                #new_path = './data/zips/%s.%s' % (key, file_type)
+                #move(file_path, new_path)
+            #except:
+                #pass
             #Create a ZipFile object.
             #try:
             #    zip_file = ZipFile(file_path)
@@ -270,8 +277,8 @@ def get_data(experiments, repository):
             #    remove(file_path)
             #except:
             #    print "ERROR UNZIPPING %s" % key
-        else:
-            pass
+        #else:
+        #    pass
 
     #Check what files were actually downloaded
     downloaded_files = listdir(repository)
