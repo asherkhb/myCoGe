@@ -2,7 +2,6 @@ __author__ = 'asherkhb'
 
 import cPickle as pickle
 import smtplib
-import subprocess
 
 from datetime import datetime
 from email import Encoders
@@ -62,9 +61,13 @@ def initialize():
         mkdir('./data/vcfs')
     if not path.exists('./data/tsvs'):
         mkdir('./data/tsvs')
+    if not path.exists('./data/zips'):
+        mkdir('./data/zips')
     #Check for directory, make if absent
-    with open('./data/_directory.txt', 'a+'):
-        pass
+    if not path.exists('./data/_directory.txt'):
+        with open('./data/_directory.txt', 'w') as new_direct:
+            new_direct.write('#myCoGe SNP Variant Data Log File\n')
+            new_direct.write('#huID\tprofile_link\tdownload_link\n\n')
 
     #Check for unknown file formats folder, make if absent
     if not path.exists('./unknown_fileformats'):
@@ -246,22 +249,24 @@ def get_data(experiments, repository):
 
         #Unzip Zipped Files
         if file_type == "zip":
+            new_path = './data/zips/%s.%s' % (key, file_type)
+            move(file_path, new_path)
             #Create a ZipFile object.
-            try:
-                zip_file = ZipFile(file_path)
-                #Create a list of ZipFile contents.
-                zip_list = ZipFile.namelist(zip_file)
-                #Create variables with old content name and new (huID) content name.
-                old_name = "%s/%s" % (repository, zip_list[0])
-                new_name = file_path.replace('.zip', '.txt')
-                #Unzip ZipFile.
-                unzip = "unzip %s -d %s " % (file_path, repository)
-                call(unzip, shell=True)
-                #Rename file contents with huID and then remove zip file.
-                rename(old_name, new_name)
-                remove(file_path)
-            except:
-                print "ERROR UNZIPPING %s" % key
+            #try:
+            #    zip_file = ZipFile(file_path)
+            #    #Create a list of ZipFile contents.
+            #    zip_list = ZipFile.namelist(zip_file)
+            #    #Create variables with old content name and new (huID) content name.
+            #    old_name = "%s/%s" % (repository, zip_list[0])
+            #    new_name = file_path.replace('.zip', '.txt')
+            #    #Unzip ZipFile.
+            #    unzip = "unzip %s -d %s " % (file_path, repository)
+            #    call(unzip, shell=True)
+            #    #Rename file contents with huID and then remove zip file.
+            #    rename(old_name, new_name)
+            #    remove(file_path)
+            #except:
+            #    print "ERROR UNZIPPING %s" % key
         else:
             pass
 
