@@ -1,5 +1,6 @@
 __author__ = 'asherkhb'
 
+from datetime import datetime
 from json import load
 
 
@@ -48,3 +49,7 @@ def json_decode(snp_json):
     print simpledata
     #Return dictionaries.
     return simpledata, alldata
+
+run_date = datetime.now().strftime("%Y%m%d")
+json_file = './temp/snps_%s.json' % run_date
+simple_data, all_data = json_decode(json_file)
