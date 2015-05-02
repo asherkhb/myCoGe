@@ -249,8 +249,11 @@ def get_data(experiments, repository):
 
         #Unzip Zipped Files
         if file_type == "zip":
-            new_path = './data/zips/%s.%s' % (key, file_type)
-            move(file_path, new_path)
+            try:
+                new_path = './data/zips/%s.%s' % (key, file_type)
+                move(file_path, new_path)
+            except:
+                pass
             #Create a ZipFile object.
             #try:
             #    zip_file = ZipFile(file_path)
