@@ -2,6 +2,7 @@ __author__ = 'asherkhb'
 
 import cPickle as pickle
 import smtplib
+import subprocess
 
 from datetime import datetime
 from email import Encoders
@@ -238,8 +239,10 @@ def get_data(experiments, repository):
 
         #WGET File.
         #command: wget -O <output file location and name> <website>
-        wget = "wget --tries=4 --timeout=30 -O %s %s" % (file_path, file_link)
-        call(wget, shell=True)
+        if file_type != 'NA':
+            wget = "wget --tries=4 --timeout=30 -O %s %s" % (file_path, file_link)
+            call(wget, shell=True, timeout=100)
+
 
         #Unzip Zipped Files
         if file_type == "zip":
@@ -253,8 +256,7 @@ def get_data(experiments, repository):
                 new_name = file_path.replace('.zip', '.txt')
                 #Unzip ZipFile.
                 unzip = "unzip %s -d %s " % (file_path, repository)
-                spawn(unzip)
-                #call(unzip, shell=True)
+                call(unzip, shell=True)
                 #Rename file contents with huID and then remove zip file.
                 rename(old_name, new_name)
                 remove(file_path)
