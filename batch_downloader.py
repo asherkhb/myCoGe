@@ -132,20 +132,22 @@ with open('failures.txt', 'r') as fail_dwn:
         entry = line.strip('\n')
         failed_downloads.append(entry)
 
-with open('downloaded.txt', 'a+') as download_success, open('failures.txt', 'a+') as download_fail:
-    for huid in simple_data:
-        if huid not in already_downloaded:
-            if huid not in failed_downloads:
-                print huid
-                download_link = simple_data[huid]['download_link']
-                status = get_data(huid, download_link)
-                if status == 'success':
+
+for huid in simple_data:
+    if huid not in already_downloaded:
+        if huid not in failed_downloads:
+            print huid
+            download_link = simple_data[huid]['download_link']
+            status = get_data(huid, download_link)
+            if status == 'success':
+                with open('downloaded.txt', 'a+') as download_success:
                     download_success.write('%s\n' % huid)
-                elif status == 'fail':
+            elif status == 'fail':
+                with open('failures.txt', 'a+') as download_fail:
                     download_fail.write('%s\n' % huid)
-                else:
-                    pass
             else:
                 pass
         else:
             pass
+    else:
+        pass
