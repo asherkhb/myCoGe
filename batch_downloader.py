@@ -136,6 +136,7 @@ with open('downloaded.txt', 'a+') as download_success, open('failures.txt', 'a+'
     for huid in simple_data:
         if huid not in already_downloaded:
             if huid not in failed_downloads:
+                print huid
                 download_link = simple_data[huid]['download_link']
                 status = get_data(huid, download_link)
                 if status == 'success':
