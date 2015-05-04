@@ -73,7 +73,7 @@ def text_vs_zip(link):
     file_type = 'NA'
     #Send request for HTTP head document, then extract content-type into variable "content".
     try:
-        spider_return = check_output(['wget', '--spider', link], stderr=STDOUT)
+        spider_return = check_output(['wget', '--spider', '--tries=4', '--timeout=30', link], stderr=STDOUT)
     except:
         spider_return = 'NULL'
 
