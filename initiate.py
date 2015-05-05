@@ -24,25 +24,34 @@ irods_pass = configs['pass']
 #       - Return Dictionary of huIDs, download links, health info
 
 json_file = './temp/snps_%s.json' % run_date
-##json_file = './temp/practice_1.json'  # For Practice
+#json_file = './temp/practice_1.json'  # For Practice
 simple_data, all_data = myCoGe.json_decode(json_file)
 
 # 3. Compare dictionary with File Directory (_directory.txt)
 #       - Return modified dictionary
 
-missing_data = myCoGe.compare_to_directory(all_data)
+##missing_data = myCoGe.compare_to_directory(all_data)
 
 # 4. Download Data
 #       - Download missing data fileset.
 
-repo = './data/tsvs'
-download = myCoGe.get_data(missing_data, repo)
+##repo = './data/tsvs'
+##download = myCoGe.get_data(missing_data, repo)
 
 
 # 5. RESOLVE DOWNLOADED/MISSING, GENERATE NEW DICT UPDATE DICT, and PRINT ERROR REPORTS
 
-downloads, absent = myCoGe.list_dict_resolve(download, missing_data)
+##downloads, absent = myCoGe.list_dict_resolve(download, missing_data)
 
+#### TEMP ####
+downloaded_files = myCoGe.listdir('./data/tsvs/')
+missing_data = []
+download = []
+absent = []
+downloads = []
+for item in downloaded_files:
+        downloads.append(item.strip('.txt'))
+####END TEMP####
 
 # 6. Update File Directory
 
