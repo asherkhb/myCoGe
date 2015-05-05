@@ -30,7 +30,7 @@ simple_data, all_data = myCoGe.json_decode(json_file)
 # 3. Compare dictionary with File Directory (_directory.txt)
 #       - Return modified dictionary
 
-##missing_data = myCoGe.compare_to_directory(all_data)
+missing_data = myCoGe.compare_to_directory(all_data)
 
 # 4. Download Data
 #       - Download missing data fileset.
@@ -45,12 +45,11 @@ simple_data, all_data = myCoGe.json_decode(json_file)
 
 #### TEMP ####
 downloaded_files = myCoGe.listdir('./data/tsvs/')
-missing_data = []
 download = []
-absent = []
-downloads = []
 for item in downloaded_files:
-        downloads.append(item.strip('.txt'))
+        download.append(item.strip('.txt'))
+
+downloads, absent = myCoGe.list_dict_resolve(download, missing_data)
 ####END TEMP####
 
 # 6. Update File Directory
