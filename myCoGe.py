@@ -16,7 +16,6 @@ from shutil import rmtree, move
 from subprocess import call, check_output, STDOUT
 from zipfile import ZipFile
 
-
 # Open reference files
 indexfile = '00-All.vcf.p'
 referencefile = '00-All.vcf'
@@ -536,10 +535,15 @@ class SnpExperiment(object):
         #Redo id's that don't start with rs
         if rsid[0] == 'i':
             rsid = rsid.replace('i', 'rs')
-
         data['rsid'] = rsid
+
+        #Might need to build a chromosome check static method
         data['chrom'] = data_list[1]
-        data['genotype'] = data_list[3]
+
+        try:
+            data['genotype'] = data_list[3][0] + ',' + data_list[3][1]
+        except IndexError:
+            data['genotype'] = data_list[3]
 
         try:
             ref_loc = snp_index[rsid]
@@ -567,8 +571,8 @@ class SnpExperiment(object):
                 data['ref'] = referenceline_split[3]
             except KeyError:
                 data['rsid'] = legacy_id
-                data['pos'] = '0'
-                data['ref'] = '?'
+                data['pos'] = '.'
+                data['ref'] = '.'
 
         return data
 
@@ -584,10 +588,13 @@ class SnpExperiment(object):
         #Redo id's that don't start with rs
         if rsid[0] == 'i':
             rsid = rsid.replace('i', 'rs')
-
         data['rsid'] = rsid
+
+        #Might need to build a chromosome check static method
         data['chrom'] = data_list[1]
-        data['genotype'] = data_list[3] + data_list[4]
+
+        #May need try loop here?
+        data['genotype'] = data_list[3] + ',' + data_list[4]
 
         try:
             ref_loc = snp_index[rsid]
@@ -615,8 +622,8 @@ class SnpExperiment(object):
                 data['ref'] = referenceline_split[3]
             except KeyError:
                 data['rsid'] = legacy_id
-                data['pos'] = '0'
-                data['ref'] = '?'
+                data['pos'] = '.'
+                data['ref'] = '.'
 
         return data
 
