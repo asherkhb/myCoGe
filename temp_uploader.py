@@ -24,15 +24,14 @@ def coge_load(huid):
     source = "PGP & myCoGe"
     path = "/iplant/home/asherkhb/coge_data/mycoge/%s.vcf" % name
     payload = '{"restricted": false, \
-               "types": [{"name": "%s Variance", "description": "%s", "notebook": %i}], \
+               "types": [{"name": "%s Variance", "description": "%s"}], \
                "genome_id": %i, \
                "version": %s, \
                "name": "%s Variance", \
                "description": "%s", \
                "source_name": "%s", \
-               "notebook": %i, \
                "items": [{"type": "irods", "path": "%s"}]\
-    }' % (name, descr, notebook, genome_id, version, name, descr, source, notebook, path)
+    }' % (name, descr, genome_id, version, name, descr, source, path)
 
     # Build API PUT request.
     base_string = '%s/experiments?username=%s&token=%s' % (baseurl, username, token)
