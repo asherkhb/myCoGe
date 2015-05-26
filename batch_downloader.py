@@ -61,19 +61,19 @@ def json_decode(snp_json):
     simpledata = {}
 
     #Open the JSON object for processing.
-    with open(snp_json, 'r') as data:
+    with open(snp_json, 'r') as scraped:
         #Load JSON data into variable jdata.
-        jdata = load(data)
+        jdata = load(scraped)
         #Iterate though each entry
         for i in range(0, len(jdata)):
             #Extract information
-            huid = jdata[i]['huid']
+            hu_id = jdata[i]['huid']
             profile_link = jdata[i]['profile_link']
-            download_link = jdata[i]['download_link']
+            dlink = jdata[i]['download_link']
 
             #Build dictionary
-            simpledata[huid] = {'download_link': download_link,
-                                'profile_link': profile_link}
+            simpledata[hu_id] = {'download_link': dlink,
+                                 'profile_link': profile_link}
 
     print "JSON Decoded"
     #Return dictionaries.
@@ -214,11 +214,11 @@ while failures:
     if retrycount > 5:
         get_input = True
         while get_input:
-            cont = raw_input("Retry failed downloads 5 more times? (Y/N)").upper()
-            if cont == "Y" or "YES":
+            cont = raw_input("Retry failed downloads 5 more times? (Y/N) ").upper()
+            if cont == "Y":
                 retrycount = 1
                 get_input = False
-            elif cont == "N" or "NO":
+            elif cont == "N":
                 failures = False
                 get_input = False
             else:
