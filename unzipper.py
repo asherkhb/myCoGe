@@ -1,7 +1,8 @@
 __author__ = 'asherkhb'
 
-from subprocess import call
 from os import listdir, path, remove, rename
+from shutil import move
+from subprocess import call
 from zipfile import ZipFile
 
 
@@ -53,6 +54,8 @@ if start:
                 call(unzip, shell=True)
                 #Rename file contents with huID and then remove zip file.
                 rename(old_name, new_name)
+                new_path = '../tsvs/%s' % new_name
+                move(new_name, new_path)
                 remove(file_path)
             else:
                 continue
