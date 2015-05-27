@@ -41,7 +41,8 @@ if start:
         zip_file = ZipFile(file_path)
         #Create a list of ZipFile contents.
         zip_list = ZipFile.namelist(zip_file)
-        print "The file contains: " + zip_list
+        print "The file contains: "
+        print zip_list
         cont = get_confirmation("Continue with unzipping and renaming %s?" % zip_list[0])
         if cont:
             #Create variables with old content name and new (huID) content name.
