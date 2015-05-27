@@ -35,7 +35,7 @@ filelist = get_zip_list()
 start = get_confirmation('There are %s files to unzip. Continue?' % str(len(filelist)))
 if start:
     for zippedfile in filelist:
-        file_path = '%s.zip' % zippedfile
+        file_path = zippedfile
         print "Processing %s" % file_path
         #Create a ZipFile object.
         zip_file = ZipFile(file_path)
